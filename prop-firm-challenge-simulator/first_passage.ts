@@ -27,6 +27,9 @@ export const MAX_STEPS = 4_000_000;
 export const NO_HORIZON_CAP_DAYS = 1_000;
 export const FORMULA_VERSION = 2;
 const OUTCOMES: Outcome[] = ["pass", "daily", "total", "censored"];
+/** Touching a limit counts (16/10): +0.8 x 10 sums to 7.999999999999999 in floating point, and a target
+ *  reached exactly on the last day was missed. 1e-9 percent of capital; the same rule as the app's engine. */
+export const TOUCH = 1e-9;
 
 export function validate(x: Inputs): void {
   const range = (name: keyof Inputs, low: number, high: number, integer = false) => {
@@ -39,6 +42,9 @@ export function validate(x: Inputs): void {
   range("totalLossPct", 0.01, 100);
   range("minDays", 0, 1_000, true);
   if (x.horizonDays !== null) range("horizonDays", 1, 1_000, true);
+  // 16/10 (limit test): a minimum longer than the horizon makes a pass impossible; the result used to read
+  // "0% pass" with no reason. Refused by name instead.
+  if (x.horizonDays !== null && x.minDays > x.horizonDays) throw new Error("minDays: cannot exceed horizonDays (no path could ever pass)");
   range("driftPct", -100, 100);
   range("volatilityPct", 0.001, 100);
   range("simulations", 20, 100_000, true);
@@ -102,9 +108,9 @@ export function evaluatePath(x: Inputs, nextIncrement: (day: number, part: numbe
       if (x.totalLossMode === "trailing" && (x.trailingBase === "check" || part === substeps)) high = Math.max(high, equity);
       const trailingFloor = high - x.totalLossPct;
       const floor = x.totalLossMode === "trailing" ? (x.trailingLock ? Math.min(0, trailingFloor) : trailingFloor) : -x.totalLossPct;
-      if ((intradayDailyCheck || part === substeps) && equity - previousClose <= -x.dailyLossPct) { outcome = "daily"; days = day - 1 + part * step; break outer; }
-      if (equity <= floor) { outcome = "total"; days = day - 1 + part * step; break outer; }
-      if (equity >= x.targetPct && day - 1 + part * step >= x.minDays) { outcome = "pass"; days = day - 1 + part * step; break outer; }
+      if ((intradayDailyCheck || part === substeps) && equity - previousClose <= -x.dailyLossPct + TOUCH) { outcome = "daily"; days = day - 1 + part * step; break outer; }
+      if (equity <= floor + TOUCH) { outcome = "total"; days = day - 1 + part * step; break outer; }
+      if (equity >= x.targetPct - TOUCH && day - 1 + part * step >= x.minDays) { outcome = "pass"; days = day - 1 + part * step; break outer; }
     }
     previousClose = equity;
     equityPath.push(equity);
