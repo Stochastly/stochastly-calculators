@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dsr, minTrl, psr } from "./sharpe.ts";
+import { dsr, minTrl, psr, SharpeInputError } from "./sharpe.ts";
 import { courbe } from "./sharpe_courbe.ts";
 
 test("DSR paper, numerical example (Bailey and Lopez de Prado 2014, pp. 9-10): SR0 0.1132, DSR 0.9004", () => {
@@ -29,4 +29,8 @@ test("the DSR curve never rises with N", () => {
     nTrials: 100, variance: 0.002, nSource: "" });
   assert.ok(c && c.points.length > 10);
   for (let i = 1; i < c.points.length; i++) assert.ok(c.points[i].dsr <= c.points[i - 1].dsr + 1e-15, `N = ${c.points[i].n}`);
+});
+
+test("inputs that overflow double precision throw a named error, never NaN", () => {
+  assert.throws(() => psr({ sr: 1e200, srStar: 0, t: 1e300, skew: 0, kurtosis: 3 }), SharpeInputError);
 });

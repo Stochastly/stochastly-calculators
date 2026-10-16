@@ -7,9 +7,11 @@ const flagged = [
   `x = request.security(\n syminfo.tickerid,\n "1D",\n high,\n lookahead = barmerge.lookahead_on\n)`,
   `x = request.security(syminfo.tickerid, "1D", close, lookahead=barmerge.lookahead_on)[1]`,
   `//@version=4\nx = security(syminfo.tickerid, "D", close, barmerge.gaps_off, barmerge.lookahead_on)`,
+  `x = request.security(syminfo.tickerid, "1D", close + open[1], lookahead=barmerge.lookahead_on)`,
 ];
 const clean = [
   `x = request.security(syminfo.tickerid, "1D", close[1], lookahead=barmerge.lookahead_on)`,
+  `x = request.security(syminfo.tickerid, "1D", (close + open)[1], lookahead=barmerge.lookahead_on)`,
   `x = request.security(syminfo.tickerid, "1D", close, lookahead=barmerge.lookahead_off)`,
   `// x = request.security(syminfo.tickerid, "1D", close, lookahead=barmerge.lookahead_on)`,
   `label.new(bar_index, high, 'request.security(s, "D", close, lookahead=barmerge.lookahead_on)')`,

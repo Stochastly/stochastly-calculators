@@ -2,11 +2,11 @@
 
 The TypeScript behind the free calculators on [stochastly.com](https://stochastly.com/tools). Each folder holds one calculation: the source file the website runs, a test, and a README with the formula and the paper it comes from.
 
-The `.ts` files are copied byte for byte from the website. The copy is generated, and a check in the website's test suite fails if the website's code and this repository drift apart.
+The `.ts` files are copied byte for byte from the website's code by a generator. The website's test suite fails when that code changes without a new pinned copy, and each publication is compared with this repository file by file and path by path.
 
 ## Run the tests
 
-Node.js 22.18 or later runs TypeScript directly, so there is nothing to install:
+Node.js runs TypeScript directly from version 22.18 in the 22 line and from 23.6 onwards, so there is nothing to install:
 
 ```
 npm test
@@ -37,9 +37,9 @@ npm test
 ## Conventions
 
 - Sharpe ratios are per period unless a name says annual. Kurtosis is non-excess (a normal distribution has 3).
-- Inputs outside a formula's domain throw a named error. Nothing returns NaN silently.
+- Inputs outside a formula's domain, or large enough to overflow double precision, throw a named error. Where a ratio is undefined (no downside, no drawdown), `calculate` in `ten_tools.ts` returns `null`.
 - Some identifiers are in French (`courbe` is curve, `cout_seuil` is cost threshold). They match the website's code, so they stay.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). `normInv` in `sharpe.ts` follows CPython's implementation of Wichura's AS241 algorithm; its notice is in [NOTICE](NOTICE).

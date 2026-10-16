@@ -140,6 +140,8 @@ export function simulate(x: Inputs, uncertain = false, progress?: (done: number)
 
 /** Exact two-barrier Brownian hitting probability for a continuous path. */
 export function brownianPassProbability(a: number, b: number, mu: number, sigma: number): number {
+  // 16/10 (review): a NaN drift came back as a NaN probability; every argument must be finite.
+  if (![a, b, mu, sigma].every(Number.isFinite)) throw new Error("barriers, drift and sigma must be finite numbers");
   if (a <= 0 || b <= 0 || sigma <= 0) throw new Error("barriers and sigma must be positive");
   if (mu === 0) return b / (a + b);
   const k = 2 * mu / (sigma * sigma);

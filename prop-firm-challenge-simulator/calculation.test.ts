@@ -28,3 +28,7 @@ test("the Wilson interval contains the observed share", () => {
   const w = wilson(30, 100);
   assert.ok(w.low < 0.3 && 0.3 < w.high);
 });
+
+test("a non-finite argument is refused, never returned as NaN", () => {
+  assert.throws(() => brownianPassProbability(2, 1, NaN, 1), /finite/);
+});

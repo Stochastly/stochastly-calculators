@@ -80,13 +80,20 @@ function assignedArgument(mask: string, span: [number, number], name: string): s
 
 // An offset on the returned series (request.security(...)[1]) is not an expression offset.
 // Recognise simple direct history references and tuples whose members all have one.
+// 16/10 (review): `close + open[1]` ended with [1] and passed, while `close` stays current. The offset
+// must apply to the WHOLE expression: one name, one call or one parenthesized group, then [n].
 function directlyOffset(expression: string): boolean {
   const e = expression.trim();
   if (/^\[[\s\S]*\]$/.test(e)) {
     const members = argumentsOf(e, 1, e.length - 1);
     return members.length > 0 && members.every(([a, b]) => directlyOffset(e.slice(a, b)));
   }
-  return /\[\s*[1-9]\d*\s*\]$/.test(e);
+  const offset = /\[\s*[1-9]\d*\s*\]$/.exec(e);
+  if (!offset) return false;
+  const base = e.slice(0, offset.index).trim();
+  if (/^[A-Za-z_][\w.]*$/.test(base)) return true;
+  const head = /^(?:[A-Za-z_][\w.]*\s*)?\(/.exec(base);
+  return head !== null && matchingClose(base, head[0].length - 1) === base.length - 1;
 }
 
 export function scanPineLookahead(source: string): PineScan {

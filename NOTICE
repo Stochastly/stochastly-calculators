@@ -1,0 +1,17 @@
+This repository is licensed under the MIT License (see LICENSE).
+
+The three copies of sharpe.ts (backtest-check, deflated-sharpe-ratio-calculator,
+minimum-track-record-length-calculator) contain `normInv`, an inverse of the standard normal
+distribution. It follows CPython's implementation of Wichura's algorithm AS241 (PPND16), function
+`_normal_dist_inv_cdf` of the statistics module: same branches and coefficients. Changes: translated from
+Python to TypeScript, coefficients written in their shortest round-trip double form, and an input
+outside (0, 1) throws a named error.
+
+CPython is distributed under the Python Software Foundation License Version 2:
+https://docs.python.org/3/license.html#psf-license
+
+Copyright (c) 2001 Python Software Foundation; All Rights Reserved.
+
+Algorithm: Wichura, M. J. (1988). Algorithm AS 241: The Percentage Points of the Normal Distribution.
+Journal of the Royal Statistical Society, Series C (Applied Statistics) 37(3), 477-484.
+https://doi.org/10.2307/2347330

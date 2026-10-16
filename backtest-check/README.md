@@ -9,7 +9,9 @@ Live calculator: [stochastly.com/check](https://stochastly.com/check)
 ```
 PSR(SR*) = Phi((SR - SR*) sqrt(T - 1) / sqrt(1 - g3 SR + (g4 - 1)/4 SR^2))
 SR0 = sqrt(V) ((1 - gamma) Phi^-1(1 - 1/N) + gamma Phi^-1(1 - 1/(N e)))
-DSR = PSR(SR0), with V = 1/T when no dispersion of the trials is given
+DSR = PSR(SR0)
+V, without a declared dispersion: 1/T for one series; for a matrix, the sample variance of the columns' Sharpe ratios
+N, for a matrix: the larger of the declared N and the number of columns
 PBO = share of CSCV splits whose in-sample winner ranks below the out-of-sample median
 ```
 

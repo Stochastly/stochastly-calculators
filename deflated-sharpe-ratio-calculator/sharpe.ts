@@ -185,7 +185,10 @@ export function psr({ sr, srStar, t, skew, kurtosis }: PsrInput): number {
   fini("T", t);
   if (t < 2) throw new SharpeInputError("t", "T must be at least 2 observations");
   const v = sharpeVarianceFactor(sr, skew, kurtosis);
-  return normCdf((sr - srStar) * Math.sqrt(t - 1) / Math.sqrt(v));
+  const z = (sr - srStar) * Math.sqrt(t - 1) / Math.sqrt(v);
+  // 16/10 (review): finite inputs can overflow (SR = 1e200: infinity over infinity) and gave NaN.
+  if (Number.isNaN(z)) throw new SharpeInputError("non_finite", "these inputs overflow double precision; the PSR is not computable");
+  return normCdf(z);
 }
 
 export interface MinTrlInput { sr: number; srStar: number; skew: number; kurtosis: number; confidence: number }
@@ -269,8 +272,11 @@ export function expectedMaxSharpe(nTrials: number, variance: number): number {
   fini("V", variance);
   if (variance < 0) throw new SharpeInputError("variance", "V, the variance of the trials' Sharpe ratios, cannot be negative");
   if (nTrials === 1) return 0;
-  return Math.sqrt(variance) * (-(1 - EULER_MASCHERONI) * normInv(1 / nTrials)
+  const sr0 = Math.sqrt(variance) * (-(1 - EULER_MASCHERONI) * normInv(1 / nTrials)
     - EULER_MASCHERONI * normInv(1 / (nTrials * Math.E)));
+  // 16/10 (review): N near 1e308 underflows 1/(N e) and gave NaN without a word.
+  if (!Number.isFinite(sr0)) throw new SharpeInputError("n", "N is too large for double precision");
+  return sr0;
 }
 
 /**

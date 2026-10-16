@@ -12,14 +12,16 @@ function randomMatrix(seed: number, T: number, K: number, drift = 0): number[][]
 }
 
 test("placebo: pure noise gives a PBO near one half on average", () => {
-  const pbo = [1, 2, 3, 4, 5, 6, 7, 8].map(seed => runCSCV({ matrix: randomMatrix(seed, 160, 40), S: 8, score: "sharpe", embargo: 0, ppy: 252 }).pbo!);
-  const mean = pbo.reduce((a, b) => a + b) / pbo.length;
+  const pbo = [1, 2, 3, 4, 5, 6, 7, 8].map(seed => runCSCV({ matrix: randomMatrix(seed, 160, 40), S: 8, score: "sharpe", embargo: 0, ppy: 252 }).pbo);
+  assert.ok(pbo.every(p => typeof p === "number" && Number.isFinite(p)), "every placebo run gives a PBO");
+  const mean = (pbo as number[]).reduce((a, b) => a + b) / pbo.length;
   assert.ok(mean > 0.35 && mean < 0.65, `placebo mean ${mean}`);
 });
 
 test("positive control: one real drift among noise gives a low PBO", () => {
-  const pbo = runCSCV({ matrix: randomMatrix(77, 160, 40, 0.012), S: 8, score: "sharpe", embargo: 0, ppy: 252 }).pbo!;
-  assert.ok(pbo < 0.2, `drift PBO ${pbo}`);
+  const pbo = runCSCV({ matrix: randomMatrix(77, 160, 40, 0.012), S: 8, score: "sharpe", embargo: 0, ppy: 252 }).pbo;
+  assert.equal(typeof pbo, "number", "a missing PBO is not a pass");
+  assert.ok(Number.isFinite(pbo) && pbo! < 0.2, `drift PBO ${pbo}`);
 });
 
 test("closed form: a dominant configuration is always first out of sample, logit ln 2, PBO 0", () => {
