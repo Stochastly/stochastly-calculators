@@ -2,7 +2,7 @@
 
 Compute mean excess return over target divided by downside deviation from pasted observations.
 
-Live calculator: [stochastly.com/tools/sortino-ratio-returns-calculator](https://stochastly.com/tools/sortino-ratio-returns-calculator)
+Page: stochastly.com/tools/sortino-ratio-returns-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

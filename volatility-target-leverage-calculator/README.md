@@ -2,7 +2,7 @@
 
 Translate an estimated volatility and a risk target into a capped exposure multiplier.
 
-Live calculator: [stochastly.com/tools/volatility-target-leverage-calculator](https://stochastly.com/tools/volatility-target-leverage-calculator)
+Page: stochastly.com/tools/volatility-target-leverage-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

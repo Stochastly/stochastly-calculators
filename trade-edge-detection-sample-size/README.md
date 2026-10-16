@@ -2,7 +2,7 @@
 
 Estimate independent trade count required for a two-sided mean test at declared power.
 
-Live calculator: [stochastly.com/tools/trade-edge-detection-sample-size](https://stochastly.com/tools/trade-edge-detection-sample-size)
+Page: stochastly.com/tools/trade-edge-detection-sample-size (not open yet; this code is published before its page)
 
 ## Formula
 

@@ -2,7 +2,7 @@
 
 Measure total gains above a threshold against total shortfalls below it from observations.
 
-Live calculator: [stochastly.com/tools/omega-ratio-returns-calculator](https://stochastly.com/tools/omega-ratio-returns-calculator)
+Page: stochastly.com/tools/omega-ratio-returns-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

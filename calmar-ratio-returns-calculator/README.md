@@ -2,7 +2,7 @@
 
 Compute compounded annual growth and peak-to-trough drawdown from a pasted return path.
 
-Live calculator: [stochastly.com/tools/calmar-ratio-returns-calculator](https://stochastly.com/tools/calmar-ratio-returns-calculator)
+Page: stochastly.com/tools/calmar-ratio-returns-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

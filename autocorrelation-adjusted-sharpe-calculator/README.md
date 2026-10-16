@@ -2,7 +2,7 @@
 
 Annualize a periodic Sharpe ratio with a stated autocorrelation and horizon using Lo's aggregation identity.
 
-Live calculator: [stochastly.com/tools/autocorrelation-adjusted-sharpe-calculator](https://stochastly.com/tools/autocorrelation-adjusted-sharpe-calculator)
+Page: stochastly.com/tools/autocorrelation-adjusted-sharpe-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

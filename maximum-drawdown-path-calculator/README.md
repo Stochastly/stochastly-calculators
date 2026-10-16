@@ -2,7 +2,7 @@
 
 Find the largest observed peak-to-trough loss in a chronological return series.
 
-Live calculator: [stochastly.com/tools/maximum-drawdown-path-calculator](https://stochastly.com/tools/maximum-drawdown-path-calculator)
+Page: stochastly.com/tools/maximum-drawdown-path-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

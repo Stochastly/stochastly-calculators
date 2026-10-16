@@ -2,7 +2,7 @@
 
 Calculate exact eventual ruin probability in a finite fair-or-biased unit-step random walk.
 
-Live calculator: [stochastly.com/tools/gambler-ruin-probability-calculator](https://stochastly.com/tools/gambler-ruin-probability-calculator)
+Page: stochastly.com/tools/gambler-ruin-probability-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

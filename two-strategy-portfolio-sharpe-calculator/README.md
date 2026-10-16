@@ -2,7 +2,7 @@
 
 Combine two expected returns and volatilities at a declared weight and correlation.
 
-Live calculator: [stochastly.com/tools/two-strategy-portfolio-sharpe-calculator](https://stochastly.com/tools/two-strategy-portfolio-sharpe-calculator)
+Page: stochastly.com/tools/two-strategy-portfolio-sharpe-calculator (not open yet; this code is published before its page)
 
 ## Formula
 

@@ -2,7 +2,7 @@
 
 Calculate the log-growth-optimal stake for a binary payoff, then apply an explicit fraction.
 
-Live calculator: [stochastly.com/tools/fractional-kelly-bet-calculator](https://stochastly.com/tools/fractional-kelly-bet-calculator)
+Page: stochastly.com/tools/fractional-kelly-bet-calculator (not open yet; this code is published before its page)
 
 ## Formula
 
