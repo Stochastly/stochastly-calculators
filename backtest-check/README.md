@@ -12,7 +12,7 @@ SR0 = sqrt(V) ((1 - gamma) Phi^-1(1 - 1/N) + gamma Phi^-1(1 - 1/(N e)))
 DSR = PSR(SR0)
 V, without a declared dispersion: 1/T for one series; for a matrix, the sample variance of the columns' Sharpe ratios
 N, for a matrix: the larger of the declared N and the number of columns
-PBO = share of CSCV splits whose in-sample winner ranks below the out-of-sample median
+PBO = share of CSCV splits whose in-sample winner ranks below the out-of-sample median; k configurations tied in sample count 1/k each
 ```
 
 ## Usage

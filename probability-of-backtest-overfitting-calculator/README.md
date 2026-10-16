@@ -9,6 +9,7 @@ Live calculator: [stochastly.com/tools/probability-of-backtest-overfitting-calcu
 ```
 for each of C(S, S/2) splits: n* = argmax in-sample score; w = rank of n* out of sample / (K + 1)
 logit = ln(w / (1 - w)); PBO = share of splits with logit < 0
+ties: columns identical once each is divided by the power of two just above its largest |return| (so a column and its double, but not its triple) are one configuration (merged; K counts distinct ones); when k configurations tie for the best in-sample score, the split counts (1/k) * sum of 1[logit < 0] over the tied winners, the expected value of picking one at random (the paper defines a single argmax)
 ```
 
 ## Usage

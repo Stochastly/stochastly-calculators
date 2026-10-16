@@ -48,13 +48,14 @@ test("format detection says what it read; a day-first date is refused", () => {
   assert.throws(() => parseBacktestCsv("date,return\n03/04/2024,0.01\n04/04/2024,0.02"), CheckInputError);
 });
 
-test("an undefined PBO names its real cause: two configurations tied in sample", () => {
+test("two configurations tied in sample: the PBO exists and the note says how the tied splits count", () => {
   const rows = ["a,b,c"];
   for (let t = 0; t < 64; t++) {
     const base = 0.002 + 0.01 * Math.sin(t * 1.3);
     rows.push(`${base},${t >= 60 ? base - 0.02 : base},${-0.001 + 0.01 * Math.cos(t * 0.7)}`);
   }
   const r = checkBacktest(rows.join("\n"), opts);
-  assert.equal(r.pbo?.value, null);
-  assert.match(r.pboNote, /splits discarded: two or more configurations tie for the best in-sample Sharpe ratio/);
+  assert.ok(r.pbo && r.pbo.value !== null && r.pbo.used === r.pbo.total && r.pbo.tied > 0);
+  assert.match(r.pboNote, /several configurations tied for the best in-sample Sharpe ratio; each such split counts the average over its tied winners \(weight 1\/k for k tied\)/);
+  assert.doesNotMatch(r.pboNote, /discarded/);
 });

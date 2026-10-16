@@ -20,6 +20,8 @@ import { ALGORITHM_VERSION, SharpeInputError, annualize, dsr, minTrl, psr, trial
 export const MAX_BYTES = 2_000_000;
 export const MAX_ROWS = 100_000;
 export const MAX_COLUMNS = 200;
+/** The one sentence for a refused size, shown by /api/check and by the landing panel (16/10: written by hand in 4 places). */
+export const TOO_LARGE_MESSAGE = `The file is too large. The limit is ${MAX_BYTES / 1_000_000} MB.`;
 export const MAX_TRIALS = 1_000_000_000;
 /** Version of the reading rules and of the verdict rule. A change to either takes a new number. */
 export const CHECK_VERSION = 2;
@@ -175,7 +177,9 @@ export function parseBacktestCsv(text: string, requested: Format | "auto" = "aut
   if (!body.length) throw new CheckInputError("empty", "The CSV has a header but no data rows.");
   if (body.length > MAX_ROWS) throw new CheckInputError("too_many_rows", `The CSV is limited to ${MAX_ROWS.toLocaleString("en-US")} rows.`);
   const width = header ? header.length : body[0].length;
-  if (width > MAX_COLUMNS + 1) throw new CheckInputError("too_many_columns", `The CSV is limited to ${MAX_COLUMNS} columns.`);
+  const tooWide = () => new CheckInputError("too_many_columns", `The CSV is limited to ${MAX_COLUMNS} columns.`);
+  // cheap bound before the row scan: no file carries more than MAX_COLUMNS data columns plus one date column
+  if (width > MAX_COLUMNS + 1) throw tooWide();
   body.forEach((r, i) => {
     if (r.length !== width) throw new CheckInputError("ragged", `Row ${i + (header ? 2 : 1)} has ${r.length} cells; the ${header ? "header" : "first row"} has ${width}.`);
   });
@@ -188,6 +192,9 @@ export function parseBacktestCsv(text: string, requested: Format | "auto" = "aut
   else if (body.some(r => AMBIGUOUS_DATE.test(r[0]))) {
     throw new CheckInputError("date_format", "The first column looks like dates in day-first or month-first form. Write dates as YYYY-MM-DD.");
   }
+  // 16/10: the limit counts DATA columns. It allowed MAX_COLUMNS + 1 cells whether or not the first one was a
+  // date, so 201 configurations without a date column passed while the page announces 200.
+  if (width - (dateCol === 0 ? 1 : 0) > MAX_COLUMNS) throw tooWide();
   // Columns that are neither dates nor numbers everywhere (symbol, side...) are allowed only with a header naming the PnL.
   const numericCols: number[] = [];
   for (let j = 0; j < width; j++) {
@@ -304,6 +311,11 @@ export function moments(r: number[]): Moments | null {
   m2 /= n; m3 /= n; m4 /= n;
   if (!(m2 > 0)) return null;
   const sd = Math.sqrt(m2);
+  // 16/10: 0.001 repeated leaves m2 ~ 1e-38 of round-off, not 0, and the series reached the PSR as a kurtosis
+  // error. Equal values are constant, and so is a spread under the resolution of a double at the mean (64 eps):
+  // it is round-off of the arithmetic, not data. A wider spread, however small, is measured (review: a
+  // 1e-10 bound refused 0.001, 0.00100000000001, 0.00099999999999).
+  if (r.every(x => x === r[0]) || sd <= 64 * Number.EPSILON * Math.abs(mean)) return null;
   return { mean, sd, sr: mean / sd, skew: m3 / sd ** 3, kurtosis: m4 / (m2 * m2) };
 }
 
@@ -394,7 +406,7 @@ export interface Report {
   /** Matrix only: the column index of `selected` in `Parsed.matrix` (names can repeat; the index cannot). */
   selectedIndex: number | null;
   configurations: number | null;
-  pbo: { value: number | null; s: number; used: number; total: number; note: string } | null;
+  pbo: { value: number | null; s: number; used: number; total: number; tied: number; distinct: number; note: string } | null;
   pboNote: string;
   verdict: Verdict;
   verdictReason: string;
@@ -404,21 +416,30 @@ function isoDay(t: number): string {
   return new Date(t).toISOString().slice(0, 10);
 }
 
-/** Each discard reason that runCSCV (cscv.ts) can return, in plain words. */
+/** Each discard reason that runCSCV (cscv.ts) can return, in plain words. A tie for the best in-sample score is not
+ *  one: since 16/10 a tied split counts the average over its tied winners (tiesNote). */
 export const DISCARD_REASONS: Record<string, string> = {
-  "tied IS winner": "two or more configurations tie for the best in-sample Sharpe ratio (duplicated, proportional or near-identical configurations can tie)",
   "undefined IS or OOS score": "a configuration has constant returns over a split half, so its Sharpe ratio is undefined",
   "fewer than five OOS observations after embargo": "fewer than five out-of-sample observations remain after the embargo",
-  "global undefined Sortino ratio or identical configurations": "every configuration is identical, or one never loses",
+  "global undefined Sortino ratio": "a configuration never loses, so its Sortino ratio is undefined",
+  "identical configurations": "every column is the same configuration (identical, or a power-of-two multiple of another, such as its double), so nothing is selected",
 };
 
 /** Why the PBO is undefined, in words: each discard reason of the CSCV with its count (16/10: the note blamed
- *  constant returns for every discard; a real grid of neighbouring moving averages loses splits to TIES, two
- *  configurations with identical in-sample results, and the reader was sent to look for the wrong thing). */
+ *  constant returns for every discard; the reader was sent to look for the wrong thing). */
 export function discardedNote(discarded: Record<string, number>, total: number): string {
   const parts = Object.entries(discarded).filter(([, n]) => n > 0)
     .map(([reason, n]) => `${n.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} splits discarded: ${DISCARD_REASONS[reason] ?? reason}`);
   return `PBO undefined: ${parts.length ? parts.join("; ") : "some splits were discarded"}. The PBO is only reported when every split counts.`;
+}
+
+/** How ties and merged columns were counted (16/10). The paper picks one in-sample winner; when k configurations tie,
+ *  the split counts the average of their k out-of-sample readings, the expected value of a random pick among them. */
+export function tiesNote(r: { tied: number; total: number; merged: number; distinct: number; K: number }, score = "Sharpe ratio"): string {
+  const parts: string[] = [];
+  if (r.merged > 0) parts.push(`${r.merged.toLocaleString("en-US")} of the ${r.K.toLocaleString("en-US")} columns repeat another configuration (identical, or a power-of-two multiple, such as a double) and were merged: ${r.distinct.toLocaleString("en-US")} distinct configurations are ranked.`);
+  if (r.tied > 0) parts.push(`In ${r.tied.toLocaleString("en-US")} of ${r.total.toLocaleString("en-US")} splits, several configurations tied for the best in-sample ${score}; each such split counts the average over its tied winners (weight 1/k for k tied), the expected value of picking one of them at random.`);
+  return parts.join(" ");
 }
 
 /** Parses and computes. Throws CheckInputError (or SharpeInputError) with a sentence for the user. */
@@ -487,8 +508,9 @@ export function checkBacktest(text: string, opts: CheckOptions): Report {
       try {
         const r = runCSCV({ matrix, S, score: "sharpe", embargo: 0, ppy });
         const note = k < 100 ? "Exploratory with fewer than about 100 configurations; there is no pass or fail threshold." : "There is no pass or fail threshold.";
-        pbo = { value: r.pbo, s: S, used: r.used, total: r.total, note };
-        pboNote = r.pbo === null ? discardedNote(r.discarded, r.total) : `PBO computed by CSCV with S = ${S} blocks, Sharpe ratio as the selection score.${reduced ? ` With ${k} configurations the number of blocks is reduced to keep the free check fast.` : ""}`;
+        const ties = tiesNote(r);
+        pbo = { value: r.pbo, s: S, used: r.used, total: r.total, tied: r.tied, distinct: r.distinct, note: ties ? `${note} ${ties}` : note };
+        pboNote = r.pbo === null ? discardedNote(r.discarded, r.total) : `PBO computed by CSCV with S = ${S} blocks, Sharpe ratio as the selection score.${reduced ? ` With ${k} configurations the number of blocks is reduced to keep the free check fast.` : ""}${ties ? ` ${ties}` : ""}`;
       } catch (e) {
         if (!(e instanceof CSCVError)) throw e;
         pboNote = `PBO not computed: ${e.message}.`;

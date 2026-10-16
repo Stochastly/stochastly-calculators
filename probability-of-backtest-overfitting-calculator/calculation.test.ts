@@ -53,3 +53,17 @@ test("CSV matrix reader: a first column of ISO dates is dropped (the form a back
   assert.deepEqual(names, ["a", "b"]);
   assert.deepEqual(matrix, [[0.01, 0.02], [-0.01, 0.03]]);
 });
+
+// Ties in sample: columns identical once scaled are one configuration (merged); k configurations tied for the best
+// in-sample score make the split count (1/k) * sum of 1[logit < 0], the expected value of a random pick among them.
+test("ties: a tied split counts one half, column order and a duplicated column change nothing", () => {
+  const matrix = randomMatrix(1, 16, 3, 0.004).map((r, t) => [r[0], t < 8 ? r[0] : r[1], r[2]]);
+  const r = runCSCV({ matrix, S: 4, score: "sharpe", embargo: 0, ppy: 1 });
+  assert.equal(r.used, 6); assert.equal(r.tied, 1);
+  const tied = r.splits.filter(s => s.isBlocks.join() === "0,1");
+  assert.deepEqual(tied.map(s => [s.winner, s.oosRank, s.weight]), [[0, 2, 0.5], [1, 1, 0.5]]);
+  assert.equal(r.pbo, (1 + 0.5) / 6);
+  assert.equal(runCSCV({ matrix: matrix.map(row => [row[2], row[1], row[0]]), S: 4, score: "sharpe", embargo: 0, ppy: 1 }).pbo, r.pbo);
+  const dup = runCSCV({ matrix: matrix.map(row => [...row, row[0]]), S: 4, score: "sharpe", embargo: 0, ppy: 1 });
+  assert.equal(dup.pbo, r.pbo); assert.equal(dup.merged, 1); assert.equal(dup.distinct, 3);
+});
