@@ -1,0 +1,19 @@
+{
+  "name": "stochastly-calculators",
+  "version": "1.0.0",
+  "description": "Source of the free calculators on stochastly.com: deflated Sharpe ratio, MinTRL, PBO, prop firm simulator and more.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test \"**/*.test.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stochastly/stochastly-calculators.git"
+  },
+  "homepage": "https://stochastly.com/tools"
+}

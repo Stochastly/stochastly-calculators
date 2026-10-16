@@ -1,0 +1,33 @@
+# Backtest check
+
+Reads one backtest CSV (returns, equity curve, trades or a matrix of configurations), says how it read it, and computes the figures of the /check report: Sharpe ratio, skewness, kurtosis, PSR, DSR, MinTRL, maximum drawdown and, for a matrix, the PBO.
+
+Live calculator: [stochastly.com/check](https://stochastly.com/check)
+
+## Formula
+
+```
+PSR(SR*) = Phi((SR - SR*) sqrt(T - 1) / sqrt(1 - g3 SR + (g4 - 1)/4 SR^2))
+SR0 = sqrt(V) ((1 - gamma) Phi^-1(1 - 1/N) + gamma Phi^-1(1 - 1/(N e)))
+DSR = PSR(SR0), with V = 1/T when no dispersion of the trials is given
+PBO = share of CSCV splits whose in-sample winner ranks below the out-of-sample median
+```
+
+## Limits
+
+The strategy verdict stays NOT CONCLUSIVE: a CSV alone does not carry the cost model, the out-of-sample protocol or the number of trials the desktop app requires before it says GO or NO-GO. The PBO is exploratory below about 100 configurations.
+
+## Reference
+
+- Bailey, D. H. and Lopez de Prado, M. (2014). The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality. Journal of Portfolio Management 40(5), 94-107. https://doi.org/10.3905/jpm.2014.40.5.094
+- Bailey, D. H. and Lopez de Prado, M. (2012). The Sharpe Ratio Efficient Frontier. Journal of Risk 15(2). https://doi.org/10.21314/JOR.2012.255
+- Bailey, D. H., Borwein, J., Lopez de Prado, M. and Zhu, Q. J. (2017). The Probability of Backtest Overfitting. Journal of Computational Finance 20(4). https://doi.org/10.21314/JCF.2016.322
+
+## Files
+
+- `check_backtest.ts`
+- `check_rule.ts`
+- `check_display.ts`
+- `sharpe.ts`: shared with 2 other folders, same bytes
+- `cscv.ts`: shared with 1 other folder, same bytes
+- `calculation.test.ts`: run with `node --test calculation.test.ts`
