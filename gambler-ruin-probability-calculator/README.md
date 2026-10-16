@@ -14,6 +14,17 @@ P(ruin) = (r^i−r^N)/(1−r^N), r=(1−p)/p; for p=0.5, P=1−i/N
 
 At p = 0.5, starting three units from ruin with an upper boundary at ten units, eventual ruin probability is exactly 1−3/10 = 0.7.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("gambler-ruin", {"units":"3","goal":"10","probability":"0.5"});
+console.log(value?.toFixed(6)); // 0.700000
+```
+
 ## Assumptions
 
 Every step changes capital by exactly one unit. Win probability is constant, steps are independent, and the game stops at either zero or the upper boundary.

@@ -14,6 +14,17 @@ n = ceil(((z[1−alpha/2] + z[power]) / effect)^2)
 
 For an effect of 0.2 standard deviations, alpha = 0.05 and power = 0.8, the normal approximation gives 197 independent trades.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("trade-power", {"effect":"0.2","alpha":"0.05","power":"0.8"});
+console.log(value?.toFixed(6)); // 197.000000
+```
+
 ## Assumptions
 
 Trade returns are independent with a stable finite variance, the standardized true effect is known for planning, and the normal approximation applies. The test is two-sided.

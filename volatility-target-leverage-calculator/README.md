@@ -14,6 +14,17 @@ raw exposure = target volatility / forecast volatility; exposure = min(raw expos
 
 A 12% target divided by a 20% forecast gives exposure 0.6. With a cap of 2, the cap does not bind and the projected volatility under the linear scaling assumption is 12%.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("volatility-target", {"target":"12","forecast":"20","cap":"2"});
+console.log(value?.toFixed(6)); // 0.600000
+```
+
 ## Assumptions
 
 The volatility forecast is measured on the same annual or periodic scale as the target. Volatility is assumed to scale linearly with exposure over the interval.

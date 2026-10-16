@@ -391,6 +391,8 @@ export interface Report {
   minTrl: number | null;
   /** Matrix only: the configuration analysed (best full-sample Sharpe ratio) and K. */
   selected: string | null;
+  /** Matrix only: the column index of `selected` in `Parsed.matrix` (names can repeat; the index cannot). */
+  selectedIndex: number | null;
   configurations: number | null;
   pbo: { value: number | null; s: number; used: number; total: number; note: string } | null;
   pboNote: string;
@@ -400,6 +402,23 @@ export interface Report {
 
 function isoDay(t: number): string {
   return new Date(t).toISOString().slice(0, 10);
+}
+
+/** Each discard reason that runCSCV (cscv.ts) can return, in plain words. */
+export const DISCARD_REASONS: Record<string, string> = {
+  "tied IS winner": "two or more configurations tie for the best in-sample Sharpe ratio (duplicated, proportional or near-identical configurations can tie)",
+  "undefined IS or OOS score": "a configuration has constant returns over a split half, so its Sharpe ratio is undefined",
+  "fewer than five OOS observations after embargo": "fewer than five out-of-sample observations remain after the embargo",
+  "global undefined Sortino ratio or identical configurations": "every configuration is identical, or one never loses",
+};
+
+/** Why the PBO is undefined, in words: each discard reason of the CSCV with its count (16/10: the note blamed
+ *  constant returns for every discard; a real grid of neighbouring moving averages loses splits to TIES, two
+ *  configurations with identical in-sample results, and the reader was sent to look for the wrong thing). */
+export function discardedNote(discarded: Record<string, number>, total: number): string {
+  const parts = Object.entries(discarded).filter(([, n]) => n > 0)
+    .map(([reason, n]) => `${n.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} splits discarded: ${DISCARD_REASONS[reason] ?? reason}`);
+  return `PBO undefined: ${parts.length ? parts.join("; ") : "some splits were discarded"}. The PBO is only reported when every split counts.`;
 }
 
 /** Parses and computes. Throws CheckInputError (or SharpeInputError) with a sentence for the user. */
@@ -431,6 +450,7 @@ export function checkBacktest(text: string, opts: CheckOptions): Report {
 
   let series = parsed.series;
   let selected: string | null = null;
+  let selectedIndex: number | null = null;
   let configurations: number | null = null;
   let nUsed = nDeclared;
   let variance: number;
@@ -446,7 +466,7 @@ export function checkBacktest(text: string, opts: CheckOptions): Report {
     const s = srs as number[];
     let best = 0;
     for (let j = 1; j < k; j++) if (s[j] > s[best]) best = j;
-    selected = parsed.names[best]; configurations = k;
+    selected = parsed.names[best]; selectedIndex = best; configurations = k;
     series = matrix.map(r => r[best]);
     nUsed = Math.max(nDeclared, k);
     understood.push(`Configuration analysed: "${selected}", the highest Sharpe ratio of the ${k}. N used: ${nUsed} (the larger of your N and the ${k} columns).`);
@@ -468,7 +488,7 @@ export function checkBacktest(text: string, opts: CheckOptions): Report {
         const r = runCSCV({ matrix, S, score: "sharpe", embargo: 0, ppy });
         const note = k < 100 ? "Exploratory with fewer than about 100 configurations; there is no pass or fail threshold." : "There is no pass or fail threshold.";
         pbo = { value: r.pbo, s: S, used: r.used, total: r.total, note };
-        pboNote = r.pbo === null ? "PBO undefined: some splits were discarded (a configuration with constant returns inside a block)." : `PBO computed by CSCV with S = ${S} blocks, Sharpe ratio as the selection score.${reduced ? ` With ${k} configurations the number of blocks is reduced to keep the free check fast.` : ""}`;
+        pboNote = r.pbo === null ? discardedNote(r.discarded, r.total) : `PBO computed by CSCV with S = ${S} blocks, Sharpe ratio as the selection score.${reduced ? ` With ${k} configurations the number of blocks is reduced to keep the free check fast.` : ""}`;
       } catch (e) {
         if (!(e instanceof CSCVError)) throw e;
         pboNote = `PBO not computed: ${e.message}.`;
@@ -520,7 +540,7 @@ export function checkBacktest(text: string, opts: CheckOptions): Report {
     sharpePerPeriod: m.sr, sharpeAnnual: annualize(m.sr, ppy), skew: m.skew, kurtosis: m.kurtosis,
     maxDrawdown, maxDrawdownUnit: unit, nTrialsDeclared: nDeclared, nTrialsUsed: nUsed,
     variance: variance!, varianceSource: varianceSource!, psr: p, sr0: d.sr0, sr0Annual: d.sr0 * Math.sqrt(ppy), dsr: d.dsr,
-    minTrl: mtrl, selected, configurations, pbo, pboNote, verdict, verdictReason,
+    minTrl: mtrl, selected, selectedIndex, configurations, pbo, pboNote, verdict, verdictReason,
   };
 }
 

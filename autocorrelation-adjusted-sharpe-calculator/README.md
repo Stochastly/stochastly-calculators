@@ -14,6 +14,17 @@ SR(q) = q × SR(1) / sqrt(q + 2 sum[k=1..q−1] (q−k) rho^k)
 
 For a per-period Sharpe of 0.1, rho = 0, and q = 12, the result is 0.346410. Setting rho = 0.2 reduces it to 0.287885 because adjacent returns move together.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("serial-sharpe", {"sharpe":"0.1","rho":"0.2","periods":"12"});
+console.log(value?.toFixed(6)); // 0.287885
+```
+
 ## Assumptions
 
 The model assumes a stationary AR(1) return process whose lag-k correlation is rho to the power k. The periodic mean and variance are treated as known estimates.

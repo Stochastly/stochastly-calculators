@@ -14,6 +14,17 @@ mu = w muA + (1−w) muB; sigma² = w² sigmaA² + (1−w)² sigmaB² + 2w(1−w
 
 With returns of 8% and 6%, volatilities of 10% and 12%, zero correlation and equal weights, expected excess return is 7%, volatility is 7.81025% and Sharpe is 0.89626.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("correlated-portfolio", {"meanA":"8","volA":"10","meanB":"6","volB":"12","weight":"0.5","correlation":"0"});
+console.log(value?.toFixed(6)); // 0.896258
+```
+
 ## Assumptions
 
 Returns, volatility and correlation refer to the same horizon, currency and excess-return convention. The weights sum to one and remain constant within that horizon.

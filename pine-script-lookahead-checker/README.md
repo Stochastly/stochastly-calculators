@@ -11,6 +11,18 @@ flag a call when lookahead = barmerge.lookahead_on (named, or the 5th positional
 and the requested expression is not offset by [1] or more
 ```
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { scanPineLookahead } from "./pine_lookahead.ts";
+
+const source = 'c = request.security(syminfo.tickerid, "1D", close, lookahead=barmerge.lookahead_on)';
+const scan = scanPineLookahead(source);
+console.log(scan.status, scan.findings.length); // potential look-ahead risk 1
+```
+
 ## Limits
 
 A pattern scanner, not a Pine interpreter. It does not follow variables across files or functions, and a clean scan does not prove a script free of repainting.

@@ -47,3 +47,9 @@ test("CSV matrix reader: header names and numbers", () => {
   assert.deepEqual(names, ["a", "b"]);
   assert.deepEqual(matrix, [[0.01, 0.02], [-0.01, 0.03]]);
 });
+
+test("CSV matrix reader: a first column of ISO dates is dropped (the form a backtest export takes)", () => {
+  const { matrix, names } = parseMatrixCSV("date,a,b\n2024-01-02,0.01,0.02\n2024-01-03,-0.01,0.03\n");
+  assert.deepEqual(names, ["a", "b"]);
+  assert.deepEqual(matrix, [[0.01, 0.02], [-0.01, 0.03]]);
+});

@@ -47,3 +47,14 @@ test("format detection says what it read; a day-first date is refused", () => {
   assert.ok(equity.understood.length > 0);
   assert.throws(() => parseBacktestCsv("date,return\n03/04/2024,0.01\n04/04/2024,0.02"), CheckInputError);
 });
+
+test("an undefined PBO names its real cause: two configurations tied in sample", () => {
+  const rows = ["a,b,c"];
+  for (let t = 0; t < 64; t++) {
+    const base = 0.002 + 0.01 * Math.sin(t * 1.3);
+    rows.push(`${base},${t >= 60 ? base - 0.02 : base},${-0.001 + 0.01 * Math.cos(t * 0.7)}`);
+  }
+  const r = checkBacktest(rows.join("\n"), opts);
+  assert.equal(r.pbo?.value, null);
+  assert.match(r.pboNote, /splits discarded: two or more configurations tie for the best in-sample Sharpe ratio/);
+});

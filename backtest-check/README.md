@@ -15,6 +15,18 @@ N, for a matrix: the larger of the declared N and the number of columns
 PBO = share of CSCV splits whose in-sample winner ranks below the out-of-sample median
 ```
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { checkBacktest } from "./check_backtest.ts";
+
+const csv = ["date,return", "2024-01-02,0.004", "2024-01-03,-0.002", "2024-01-04,0.003", "2024-01-05,0.001", "2024-01-08,-0.001"].join("\n");
+const report = checkBacktest(csv, { format: "auto", nTrials: 10, periodsPerYear: 252, sharpeStdAnnual: null });
+console.log(report.format, report.observations, report.sharpePerPeriod.toFixed(4)); // returns 5 0.4385
+```
+
 ## Limits
 
 The strategy verdict stays NOT CONCLUSIVE: a CSV alone does not carry the cost model, the out-of-sample protocol or the number of trials the desktop app requires before it says GO or NO-GO. The PBO is exploratory below about 100 configurations.

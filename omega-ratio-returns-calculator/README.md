@@ -14,6 +14,17 @@ sample Omega(target) = sum(max(r−target,0)) / sum(max(target−r,0))
 
 For 4%, −2%, 3%, −1% and a zero threshold, positive excess sums to 7 points and shortfall sums to 3 points, giving Omega 2.333333.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("omega", {"returns":"4,-2,3,-1","target":"0"});
+console.log(value?.toFixed(6)); // 2.333333
+```
+
 ## Assumptions
 
 The empirical distribution assigns equal mass to every observation. The threshold is in the same percentage units and time interval as the returns.

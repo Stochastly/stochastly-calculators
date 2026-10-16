@@ -11,9 +11,24 @@ for each of C(S, S/2) splits: n* = argmax in-sample score; w = rank of n* out of
 logit = ln(w / (1 - w)); PBO = share of splits with logit < 0
 ```
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { runCSCV } from "./cscv.ts";
+import { parseMatrixCSV } from "./cscv-csv.ts";
+
+// two configurations, the first better in every block: its out-of-sample rank is always first, PBO 0
+const rows = Array.from({ length: 24 }, (_, t) => (t % 2 === 0 ? "0.03,0.01" : "-0.01,-0.02"));
+const { matrix } = parseMatrixCSV(["fast,slow", ...rows].join("\n"));
+const r = runCSCV({ matrix, S: 4, score: "sharpe", embargo: 0, ppy: 252 });
+console.log(r.pbo, r.used, r.total); // 0 6 6
+```
+
 ## Limits
 
-At least 4 observations per block (T >= 4S) and two configurations. The estimate is biased upward with few configurations and says nothing about a strategy outside the tried set.
+One column per configuration; a first column of ISO dates (YYYY-MM-DD) is ignored. At least 4 observations per block (T >= 4S) and two configurations. The estimate is biased upward with few configurations and says nothing about a strategy outside the tried set.
 
 ## Reference
 

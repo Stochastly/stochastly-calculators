@@ -14,6 +14,17 @@ wealth[t] = wealth[t−1](1+r[t]); peak[t] = max(peak[t−1],wealth[t]); MDD = m
 
 Starting at one, returns 10%, −20%, 5%, −10% produce wealth 1.1, 0.88, 0.924 and 0.8316. The largest peak-to-trough decline is 24.4%.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("maximum-drawdown", {"returns":"10,-20,5,-10"});
+console.log(value?.toFixed(6)); // 0.244000
+```
+
 ## Assumptions
 
 Inputs are chronological simple returns, with an initial wealth of one. The statistic uses observed close-to-close values only and treats the initial wealth as the first running peak.

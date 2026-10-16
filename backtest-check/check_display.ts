@@ -31,7 +31,7 @@ const sentence = (t: string) => t.charAt(0).toUpperCase() + t.slice(1).replace(/
 export type ReportRow = [label: string, value: string, note?: string];
 
 /** The rows of the report, in the order the page prints them. */
-export function reportRows(r: Omit<Report, "understood" | "selected">): ReportRow[] {
+export function reportRows(r: Omit<Report, "understood" | "selected" | "selectedIndex">): ReportRow[] {
   const rows: ReportRow[] = [
     ["Format", FORMAT_LABEL[r.format]],
     ["Observations, T", String(r.observations)],

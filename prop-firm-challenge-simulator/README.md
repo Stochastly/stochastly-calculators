@@ -12,6 +12,19 @@ zero drift: P(pass) = b / (a + b), a = profit target, b = total loss limit
 random numbers: Mulberry32 seed, Box-Muller normals
 ```
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { brownianPassProbability, simulate } from "./first_passage.ts";
+
+// zero drift, 10% target, 5% total loss limit: the closed form is b / (a + b)
+console.log(brownianPassProbability(10, 5, 0, 1).toFixed(4)); // 0.3333
+const s = simulate({ targetPct: 8, dailyLossPct: 5, totalLossPct: 10, minDays: 5, horizonDays: 120, driftPct: 0.08, volatilityPct: 1.2, simulations: 3000, seed: 20261003, driftSdPct: 0.06 });
+console.log(s.counts.pass); // 2155
+```
+
 ## Limits
 
 Returns are Gaussian and independent from day to day. Consistency rules, news rules and inactivity rules of a real firm are not modelled.

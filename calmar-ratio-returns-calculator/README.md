@@ -14,6 +14,17 @@ CAGR = product(1+r)^(periods/n)−1; MDD = max(1−wealth/running peak); Calmar 
 
 Returns of 10%, −5%, 8%, −2% with four observations per year end at wealth 1.106028. CAGR is 10.6028%, maximum drawdown is 5%, and Calmar is 2.12056.
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./ten_tools.ts";
+
+const value = calculate("calmar", {"returns":"10,-5,8,-2","periods":"4"});
+console.log(value?.toFixed(6)); // 2.120560
+```
+
 ## Assumptions
 
 The series is chronological, each observation spans the same amount of time and returns are simple percentage returns. Wealth starts at one and the initial point is a peak candidate.

@@ -13,6 +13,18 @@ SR0 = sqrt(V) ((1 - gamma) Phi^-1(1 - 1/N) + gamma Phi^-1(1 - 1/(N e)))
 DSR = PSR(SR0)
 ```
 
+## Usage
+
+Node.js runs this file as is from 22.18 in the 22 line and from 23.6 onwards (save it in this folder as `example.ts`, then `node example.ts`):
+
+```ts
+import { calculate } from "./sharpe.ts";
+
+// the worked example of Bailey and Lopez de Prado (2014): annual SR 2.5 on 1,250 days, 100 trials
+const out = calculate({ sr: 0.1581139, t: 1250, skew: -3, kurtosis: 10, srStar: 0, confidence: 0.95, nTrials: 100, variance: 0.002, periodsPerYear: 250, nSource: "" });
+console.log(out.sr0?.toFixed(4), out.dsr?.toFixed(4)); // 0.1132 0.9004
+```
+
 ## Limits
 
 V = 1/T when left empty is a large-sample value under the null of no skill; it ignores any spread of true skill between trials. The DSR needs an honest count of the trials actually run.
